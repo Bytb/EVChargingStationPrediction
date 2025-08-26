@@ -3,7 +3,7 @@ import pandas as pd
 import os
 from tqdm import tqdm
 
-TEST = 'TestRun(Tampa)'
+TEST = 'LA'
 # ---- CONFIG ----
 road_path = f"C:\\Users\\Caleb\\OneDrive - University of South Florida\\EV_Research\\EV_Research_PythonCode\\ArcGISData\\{TEST}\\Segments\\Roads.shp"
 station_folder = f"C:\\Users\\Caleb\\OneDrive - University of South Florida\\EV_Research\\EV_Research_PythonCode\\ArcGISData\\{TEST}\\Labels\\FilteredStationLocationsPerYear"

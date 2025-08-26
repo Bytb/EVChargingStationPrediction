@@ -2,7 +2,7 @@ import pandas as pd
 import networkx as nx
 
 # === USER INPUT ===
-csv_path = r'C:\Users\Caleb\OneDrive - University of South Florida\EV_Research\EV_Research_PythonCode\data\tampa\edges_fullscale_with_time.csv'  # Replace with your file path
+csv_path = r'C:\Users\Caleb\OneDrive - University of South Florida\EV_Research\EV_Research_PythonCode\data\tampa\edges_fullscale.csv'  # Replace with your file path
 source_col = 'source'  # Name of source column in the CSV
 target_col = 'target'  # Name of target column in the CSV
 is_directed = False     # Set True if your graph is directed

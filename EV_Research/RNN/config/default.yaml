@@ -1,0 +1,73 @@
+dataset:
+  city: tampa
+  root: data/${dataset.city}
+
+  # Step 3 hyperparams
+  window_L: 4          # <— set this to 2/3/5/etc.
+  stride: 1
+  horizon: 1           # labels already encode 2-yr Δ at row t
+  drop_missing_labels: true
+  zero_masked_features: true
+
+  features_dir: ${dataset.root}/features_RNN
+  labels_dir:   ${dataset.root}/labels_RNN
+  edges_dir:    ${dataset.root}/edges_RNN_synced
+  graph_dir:    ${dataset.root}/graph_static
+
+  use_lag1_label_feature: true      # add y(t-1) in label z-space
+  lag1_add_availability_flag: true  # add {0,1} flag if t-1 exists
+  add_time_feature: false            # add t_norm ∈ [0,1]
+
+
+graph:
+  norm: gcn        # rw for gwnet, gcn for influencer_rank
+  add_self_loops: true
+  build_if_missing: true
+  verify_with_features: true
+
+# Step 2.5 — normalization
+normalize:
+  enable: true
+  train_end_year: 2021          # fit stats on [min_year .. this_year], inclusive
+  std_floor: 1e-3
+
+  # Features (by NAME, must match feature_names.json)
+  log1p_features: ["Age", "EVs", "Education", "Income", "Length", "Male",
+                   "Population", "StationCount", "White"]            # log1p ONLY; will FAIL if any are negative
+  passthrough_features: ["Policy"]      # leave as-is
+  drop_features: ["Temperature"]             # remove entirely
+
+  # If you later decide log1p + z-score helps, flip this to true
+  zscore_after_log1p: true
+
+  # Labels (Δ growth)
+  method_y: zscore              # options: zscore | asinh_then_zscore
+  asinh_scale: auto             # 'auto' uses train std; or give a number (e.g., 2.0)
+
+  # Outputs/behavior
+  apply_in_loader: true         # transform on-the-fly in Step 3
+  materialize_files: false      # don't write X_trf.npy / y_trf.npy by default
+  run_report_on_fit: true       # print train-slice means/stds after fitting
+
+train:
+  model: influencer_rank            # or influencer_rank, gwnet
+  epochs: 200
+  batch_size: 16
+  dropout: 0.2
+  lr: 1e-3
+  weight_decay: 1e-4
+  grad_clip: 1.0
+  amp: true
+  early_stop:
+    metric: val_mae
+    patience: 12
+  loss:
+    kind: huber           # huber | quantile | underpred_huber
+    huber_delta: 1.0
+    quantile_q: 0.3
+    underpred_weight: 2.0
+  surge_threshold: 1.5    # in *standardized* label units (or raw if you prefer)
+logging:
+  out_dir: runs/${dataset.city}/${train.model}
+  seed: 42
+device: cuda:0

@@ -57,10 +57,6 @@ y_norm = (y_raw - label_mean) / label_std
 y = torch.tensor(y_norm, dtype=torch.float32).to(DEVICE)
 
 # -------- Adjacency Matrix --------
-# A = nx.to_numpy_array(G, nodelist=node_list)
-# A = torch.tensor(A, dtype=torch.float32).to(DEVICE)
-#A = to_scipy_sparse_array(G, nodelist=node_list, format='csr')
-# 1. Get adjacency as scipy sparse matrix (COO)
 # --- Convert NX to scipy sparse ---
 A_sp = to_scipy_sparse_array(G, nodelist=node_list, format="coo")
 
