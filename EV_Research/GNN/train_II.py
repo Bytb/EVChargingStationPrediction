@@ -118,40 +118,6 @@ y, y_meta = transform_labels(
     device=DEVICE
 )
 
-
-
-# === Print dropped nodes (from edges but not in BOTH features & labels) ===
-# SRC, DST = "source", "target"  # change if your edge columns differ
-
-# edges_nodes = set(edges[SRC]) | set(edges[DST])
-# feat_nodes  = set(features.index)
-# label_nodes = set(labels.index)
-# both_nodes  = feat_nodes & label_nodes
-
-# dropped = sorted(edges_nodes - both_nodes)                 # will be removed from the graph
-# missing_in_features = sorted(edges_nodes - feat_nodes)     # present in edges, absent in features
-# missing_in_labels   = sorted(edges_nodes - label_nodes)    # present in edges, absent in labels
-# isolated_in_featlab = sorted(both_nodes - edges_nodes)     # in both tables but not in edge list
-
-# def print_list(title, items, max_items=100):
-#     print(f"\n{title}: {len(items)}")
-#     if not items:
-#         return
-#     if len(items) <= max_items:
-#         for v in items: print("  ", v)
-#     else:
-#         for v in items[:max_items]: print("  ", v)
-#         print(f"  ... (+{len(items)-max_items} more)")
-
-# print_list("Dropped nodes (in edges but not in BOTH features & labels)", dropped)
-# # Optional extra context:
-# print_list("Edges nodes missing from FEATURES", missing_in_features)
-# print_list("Edges nodes missing from LABELS",   missing_in_labels)
-# print_list("Isolated (in features+labels but not in edges)", isolated_in_featlab)
-
-
-
-
 # ----------------- 4) Edge index for PyG -----------------
 edge_index = build_edge_index_from_G(G, node_list).to(DEVICE)
 
@@ -250,15 +216,6 @@ preds_denorm = inverse_transform_preds(preds, y_meta)
 
 # Raw (original) true labels from the DataFrame
 true_vals = labels.select_dtypes(include=[np.number]).values.squeeze()
-
-# print("preds (raw) min/max:", float(np.nanmin(preds_denorm)), float(np.nanmax(preds_denorm)))
-# print("true (raw) min/max:", float(np.nanmin(true_vals)), float(np.nanmax(true_vals)))
-
-# # Basic sanity
-# test_idx = test_mask.detach().cpu().numpy()
-# print("Max/min of raw preds (transformed space):", np.nanmax(preds), np.nanmin(preds))
-# print("NaNs in preds_denorm?", np.isnan(preds_denorm[test_idx]).sum())
-# print("NaNs in true_vals?",   np.isnan(true_vals[test_idx]).sum())
 
 # ----- Baselines on RAW scale -----
 test_idx  = test_mask.detach().cpu().numpy().astype(bool)
