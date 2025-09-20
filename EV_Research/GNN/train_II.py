@@ -3,12 +3,13 @@ import torch
 import random
 import numpy as np
 import pandas as pd
-import networkx as nx
 from tqdm import tqdm
+import networkx as nx
+from pathlib import Path
+from Models.GCN import GCN
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
 from sklearn.metrics import mean_squared_error, mean_absolute_error
-from Models.GCN import GCN
 from Transforms import transform_features, transform_labels, inverse_transform_preds
 
 # -------- SET RANDOM SEED --------
@@ -21,6 +22,8 @@ if torch.cuda.is_available():
     torch.cuda.manual_seed_all(SEED)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
+project_root = Path(__file__).resolve().parents[2]
+data_dir = project_root / "data"
 
 # ----------------- CONFIG -----------------
 TRAIN_END_YEAR = 2021
@@ -42,12 +45,12 @@ SPATIO_TEMPORAL = False
 
 # --------- LOAD DATA ---------
 if SPATIO_TEMPORAL:
-    edges = pd.read_csv(f"C:\\Users\\Caleb\\OneDrive - University of South Florida\\EV_Research\\EV_Research_PythonCode\\data\\{TEST}\\edges_fullscale_with_time.csv")
+    edges = pd.read_csv(data_dir / TEST / "edges_fullscale_with_time.csv")
 else:
-    edges = pd.read_csv(f"C:\\Users\\Caleb\\OneDrive - University of South Florida\\EV_Research\\EV_Research_PythonCode\\data\\{TEST}\\edges_fullscale.csv")
+    edges = pd.read_csv(data_dir / TEST / "edges_fullscale.csv")
 
-features = pd.read_csv(f"C:\\Users\\Caleb\\OneDrive - University of South Florida\\EV_Research\\EV_Research_PythonCode\\data\\{TEST}\\Final_Joined_Features.csv", index_col=0)
-labels   = pd.read_csv(f"C:\\Users\\Caleb\\OneDrive - University of South Florida\\EV_Research\\EV_Research_PythonCode\\data\\{TEST}\\Labels_Test.csv", index_col=0)
+features = pd.read_csv(data_dir / TEST / "Final_Joined_Features.csv", index_col=0)
+labels   = pd.read_csv(data_dir / TEST / "Labels_Test.csv", index_col=0)
 
 # ---- Build Graph (ensure correct column names if different) ----
 # e.g., nx.from_pandas_edgelist(edges, source="src", target="dst")
@@ -250,8 +253,6 @@ cf_test = cf_all[test_idx].astype(float)
 miss = np.isnan(cf_test)
 if miss.any():
     cf_test[miss] = y_train_raw.mean()
-
-from sklearn.metrics import mean_squared_error, mean_absolute_error
 
 print("\n--- Baseline metrics (raw scale, test split) ---")
 print("Model MSE:",   mean_squared_error(y_test_raw, preds_denorm[test_idx]))

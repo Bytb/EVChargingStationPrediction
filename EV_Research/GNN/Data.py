@@ -1,11 +1,14 @@
 import os
 os.environ["KMP_DUPLICATE_LIB_OK"] = "True"
 
+from pathlib import Path
 import pandas as pd
-import torch
+#import torch
 import numpy as np
 
 # Parameters
+project_root = Path(__file__).resolve().parents[2]
+data_dir = project_root / "data"
 cities = ['tampa', 'seattle', 'dallas', 'philadelphia', 'atlanta', 'chicago', 'la']
 all = ['tampa', 'seattle', 'dallas', 'philadelphia', 'atlanta', 'chicago', 'la', 'NHS']
 test = ['tampa']
@@ -13,18 +16,19 @@ test = ['tampa']
 skew_dfs = []
 
 for city in test:
-    DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+    #DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+    DEVICE = "cpu"
     TEST = city
     SPATIO_TEMPORAL = True
 
     #edges = pd.read_csv(r"C:\Users\Caleb\OneDrive - University of South Florida\EV_Research\EV_Research_PythonCode\data\tampa\Raw_Edges_Expanded.csv")
     if SPATIO_TEMPORAL:
-        edges = pd.read_csv(f"C:\\Users\\Caleb\\OneDrive - University of South Florida\\EV_Research\\EV_Research_PythonCode\\data\\{TEST}\\edges_fullscale_with_time.csv")
+        edges_path = data_dir / city / "edges_fullscale_with_time.csv"
     else:
-        edges = pd.read_csv(f"C:\\Users\\Caleb\\OneDrive - University of South Florida\\EV_Research\\EV_Research_PythonCode\\data\\{TEST}\\edges_fullscale.csv")
-    features = pd.read_csv(f"C:\\Users\\Caleb\\OneDrive - University of South Florida\\EV_Research\\EV_Research_PythonCode\\data\\{TEST}\\Final_Joined_Features.csv", index_col=0)
-    labels = pd.read_csv(f"C:\\Users\\Caleb\\OneDrive - University of South Florida\\EV_Research\\EV_Research_PythonCode\\data\\{TEST}\\Labels_Test.csv", index_col=0)
-
+        edges_path = data_dir / city / "edges_fullscale.csv"
+    features = pd.read_csv(data_dir / city / "Final_Joined_Features.csv", index_col=0)
+    labels = pd.read_csv(data_dir / city / "Labels_Test.csv", index_col=0)
+    edges = pd.read_csv(edges_path)
     # --- Format IDs ---
     def adjust_edge(entry):
         road, year = entry.replace("Road", "").split("_")
@@ -65,7 +69,7 @@ except ImportError:
 # Save plain table to CSV
 skew_table.to_csv("city_skew_statistics.csv")
 
-print("\n📊 Skew table saved to city_skew_statistics.csv")
+#print("\n📊 Skew table saved to city_skew_statistics.csv")
 
 # --- Normalize Features ---
 # def normalize_features(features, log_transform_cols=None, future_year=None):
